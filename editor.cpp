@@ -204,6 +204,7 @@ void Editor::openFile(QString fileName)
     file->flush();
     file->close();
     emit(this->filenameChanged(fileName));
+//    this->setFileExtension();
 }
 
 void Editor::saveFile(QString fileName)

@@ -18,6 +18,7 @@
 
 //#include "tab.h"
 #include "editor.h"
+#include "statusbar.h"
 
 class MainWindow : public QMainWindow
 {
@@ -55,6 +56,8 @@ private:
     QPushButton *newWindowButton;
     QPushButton *compileButton;
     QPushButton *runButton;
+
+    StatusBar *windowStatusBar;
 
     /* icons */
     QIcon *newTabIcon = new QIcon(iconPath + "baseline_add_black_48dp.png");
@@ -114,6 +117,8 @@ private:
     void createHelpMenu();
     void createButtons();
 
+    void createStatusBar();
+
 //    void setupTabs();
 
     void createActions();
@@ -140,9 +145,15 @@ public slots:
     void undo();
     void redo();
 
+    void updateStatusbar(int);
+
     void closeTab(int index);
+    void closeWindow();
+
 
 //    void updateSettings();
+public:
+     virtual void closeEvent ( QCloseEvent * event );
 };
 
 #endif // MAINWINDOW_H

@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     this->createActions();
     this->createMenus();
     this->createButtons();
+    this->loadSettings();
 }
 
 MainWindow::~MainWindow()
@@ -30,6 +31,11 @@ void MainWindow::createLayout()
     topFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QWidget *bottomFiller = new QWidget;
     bottomFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    this->windowStatusBar = new StatusBar;
+    this->setStatusBar(this->windowStatusBar);
+
+    this->createStatusBar();
 
     hBoxLayout = new QHBoxLayout(); /* horizontal layout */
 
@@ -51,6 +57,7 @@ void MainWindow::createLayout()
     connect(editorTabs, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
 
     outputTabs = new QTabWidget();
+    outputTabs->setMovable(true);
     verticalSplitter->addWidget(editorTabs);
     verticalSplitter->addWidget(outputTabs);
 //      verticalSplitter->addWidget(console);   /* console under the tab */
@@ -73,6 +80,8 @@ void MainWindow::createLayout()
     this->outputTabs->addTab(new QWidget(), tr("Debug"));
     this->outputTabs->addTab(new QWidget(), tr("Output"));
     this->outputTabs->addTab(new QWidget(), tr("Terminal"));
+
+    connect(this->editorTabs, SIGNAL(currentChanged(int)), this, SLOT(updateStatusbar(int)));
 
 }
 
@@ -166,6 +175,12 @@ void MainWindow::createButtons()
     runButton->setToolTip(tr("Run"));
 }
 
+void MainWindow::createStatusBar()
+{
+//    QLabel *extensionLabel = new QLabel();
+//    this->windowStatusBar->addWidget(extensionLabel);
+}
+
 void MainWindow::createActions()
 {
     createFileActions();
@@ -212,7 +227,7 @@ void MainWindow::createFileActions()
     exitAct = new QAction(tr("Exit"), this);
     exitAct->setShortcut(QKeySequence::Quit);
     exitAct->setStatusTip(tr("Close current window"));
-//    connect(exitAct, SIGNAL(triggered(bool)), this, SLOT(close()));
+    connect(exitAct, SIGNAL(triggered(bool)), this, SLOT(closeWindow()));
 }
 
 
@@ -283,17 +298,22 @@ void MainWindow::saveFile()
     Editor *currentEditor = dynamic_cast<Editor*>(editorTabs->currentWidget());
     QString openedFileName = currentEditor->getOpenedFileName();
 
-    QFile file(openedFileName);
-    if (file.open(QIODevice::ReadWrite)) {
-      QTextStream stream(&file);
-                stream << currentEditor->document()->toPlainText();
-                file.flush();
-                file.close();
-            }
-            else {
-                QMessageBox::critical(this, tr("Errore"), tr("Cant save file"));
-                return;
-            }
+    if (openedFileName.isEmpty()) {
+        this->saveAsFile();
+    }
+    else {
+        QFile file(openedFileName);
+        if (file.open(QIODevice::ReadWrite)) {
+          QTextStream stream(&file);
+                    stream << currentEditor->document()->toPlainText();
+                    file.flush();
+                    file.close();
+                }
+                else {
+                    QMessageBox::critical(this, tr("Errore"), tr("Cant save file"));
+                    return;
+                }
+    }
 
 
 }
@@ -324,7 +344,8 @@ void MainWindow::saveAsFile()
 
             QString info = ">> " + filename + " saved\n";
             qDebug() << info << "\n";
-            statusBar()->showMessage(currentEditor->getFileExtension());    /* show the file extension in the statusbar */
+//            windowStatusBar->showMessage(currentEditor->getFileExtension());    /* show the file extension in the statusbar */
+            windowStatusBar->setFileExtension(currentEditor->getFileExtension());
 
             file->write(currentEditor->toPlainText().toStdString().c_str()); /* write text to the file */
             file->flush();
@@ -367,25 +388,9 @@ void MainWindow::openFile()
                 Editor *currentEditor = dynamic_cast<Editor*>(editorTabs->currentWidget());
                 currentEditor->openFile(filename);
 
-    #if 0
-                Highlighter *currentHighlighter = new Highlighter(currentEditor->document());
-                currentEditor->setFileNameAndExtension(filename);
-                currentHighlighter->setupRule(currentEditor->getFileExtension());
-
-                QString info = ">> " + filename + " opened\n";
-                console->appendPlainText(info);
-                statusBar()->showMessage(currentEditor->getFileExtension());
-    #if DEBUG == 1
-                cout <<  currentEditor->getOpenedFileName().toStdString() << endl;
-                cout <<  currentEditor->getFileExtension().toStdString() << endl;
-    #endif
-                QTextStream *readFile = new QTextStream(file);
-                currentEditor->document()->setPlainText(readFile->readAll());
-                file->flush();
-                file->close();
-    #endif
                 emit(currentEditor->filenameChanged(filename));
                 editorTabs->setTabText(editorTabs->currentIndex(), currentEditor->getShortFileName());
+                windowStatusBar->setFileExtension(currentEditor->getFileExtension());
 
             }
             catch (...){
@@ -423,6 +428,7 @@ void MainWindow::openFile(QString path)
 
                 emit(currentEditor->filenameChanged(path));
                 editorTabs->setTabText(editorTabs->currentIndex(), currentEditor->getShortFileName());
+                windowStatusBar->setFileExtension(currentEditor->getFileExtension());   // set file extension and show in statusbar
 
             }
             catch (...){
@@ -453,17 +459,37 @@ void MainWindow::addTab()
 void MainWindow::saveGeometry()
 {
 
+
 }
 
 void MainWindow::saveSettings()
 {
+    QSettings settings(QString("configs/config.ini"), QSettings::IniFormat);
+
+    settings.setValue("window/geometry", this->geometry());
+    settings.setValue("window/vertical_splitter", this->verticalSplitter->saveState());
+    settings.setValue("window/horizontal_splitter", this->horizontalSplitter->saveState());
+    settings.setValue("theme", "default.css");
 
 }
 
 void MainWindow::loadSettings()
 {
+    if(QFile::exists(QString("configs/config.ini"))) {
 
+        QSettings settings(QString("configs/config.ini"), QSettings::IniFormat);
+
+        QRect geometry =  settings.value("window/geometry", this->geometry()).toRect();
+        this->setGeometry(geometry);
+
+        QByteArray state = settings.value("window/vertical_splitter").toByteArray();
+        this->verticalSplitter->restoreState(state);
+        state = settings.value("window/horizontal_splitter").toByteArray();
+        this->horizontalSplitter->restoreState(state);
+//        settings.setValue("theme", "default.css");
+    }
 }
+
 
 void MainWindow::openSettingsWindow()
 {
@@ -480,6 +506,16 @@ void MainWindow::redo()
 
 }
 
+// TODO:
+void MainWindow::updateStatusbar(int)
+{
+    Editor *newEditor = dynamic_cast<Editor*>(this->editorTabs->currentWidget());
+
+    QString fileExtension = newEditor->getFileExtension();
+    windowStatusBar->setFileExtension(fileExtension);
+
+}
+
 void MainWindow::closeTab(int index)
 {
     std::cout << "close Tab clicked" << index << std::endl;
@@ -490,5 +526,19 @@ void MainWindow::closeTab(int index)
     this->editorTabs->removeTab(index);
     this->editorTabs->setCurrentIndex(currentIndex);
 
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+
+    this->closeWindow();
+
+}
+
+void MainWindow::closeWindow()
+{
+    qDebug() << "Exit\n";
+    this->saveSettings();
+    this->close();
 }
 

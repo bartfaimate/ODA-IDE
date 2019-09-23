@@ -30,7 +30,8 @@ SOURCES += \
     settings.cpp \
     tab.cpp \
     editor.cpp \
-    highlighter.cpp
+    highlighter.cpp \
+    statusbar.cpp
     unittests/unittests.cpp
     
 HEADERS += \
@@ -38,7 +39,8 @@ HEADERS += \
     settings.h \
     tab.h \
     editor.h \
-    highlighter.h
+    highlighter.h \
+    statusbar.h
 
 
 
