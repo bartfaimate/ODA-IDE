@@ -18,14 +18,8 @@ make
 
 ## Status
 
-
-Not properly working yet
-Working functions:
-* File load 
-* File save
-* New window
-* Exit
-* Edit menu
+\[ 2019-10-17\]
+Refactored the previous version of ODA-IDE. Old version moved to ODA-IDE\_old https://github.com/bartfaimate/ODA-IDE_old
 
 ## License
 
