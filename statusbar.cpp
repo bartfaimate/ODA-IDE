@@ -3,6 +3,7 @@
 StatusBar::StatusBar(QWidget *parent) : QStatusBar (parent)
 {
     this->fileExtensionLabel = new QLabel(this);
+    this->addWidget(new QLabel(tr("Filetype: ")));
     this->addWidget(fileExtensionLabel);
 }
 

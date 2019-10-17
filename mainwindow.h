@@ -19,6 +19,7 @@
 //#include "tab.h"
 #include "editor.h"
 #include "statusbar.h"
+#include "filemanager.h"
 
 class MainWindow : public QMainWindow
 {
@@ -86,6 +87,7 @@ private:
     QAction *newFileAct;
     QAction *newProjectAct;
     QAction *openFileAct;
+    QAction *openFolderAct;
     QAction *saveFileAct;
     QAction *saveFileAsAct;
     QAction *printAct;
@@ -107,6 +109,8 @@ private:
     QAction *aboutQtAct;
 
     MainWindow *newWindows;
+
+    FileManager *fileManager;
 
 private:
     void createLayout();
@@ -135,6 +139,7 @@ public slots:
     void saveFile();
     void saveAsFile();
     void openFile();
+    void openFolder();
     void openFile(QString path);
     void addTab();
     void saveGeometry();

@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    filemanager.cpp \
         main.cpp \
         mainwindow.cpp \
     settings.cpp \
@@ -35,6 +36,7 @@ SOURCES += \
     unittests/unittests.cpp
     
 HEADERS += \
+    filemanager.h \
         mainwindow.h \
     settings.h \
     tab.h \

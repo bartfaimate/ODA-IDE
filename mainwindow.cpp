@@ -46,6 +46,8 @@ void MainWindow::createLayout()
     menuBar = new QMenuBar(topFiller);  /* menubar to the top */
     toolBar = new QToolBar(topFiller);  /* toolbar to the top, under menubar */
 
+    fileManager = new FileManager();
+    horizontalSplitter->addWidget(fileManager);
     horizontalSplitter->addWidget(verticalSplitter);
 
     // set sizepolicy for horizontalsplitter
@@ -82,6 +84,7 @@ void MainWindow::createLayout()
     this->outputTabs->addTab(new QWidget(), tr("Terminal"));
 
     connect(this->editorTabs, SIGNAL(currentChanged(int)), this, SLOT(updateStatusbar(int)));
+    connect(this->fileManager, SIGNAL(filePath(QString)), this, SLOT(openFile(QString)));
 
 }
 
@@ -99,9 +102,10 @@ void MainWindow::createFileMenu()
     fileMenu = menuBar->addMenu(tr("&File"));
     fileMenu->addAction(newWindowAct);
     fileMenu->addAction(newProjectAct);
-    fileMenu->addAction(newTabAct);
+//    fileMenu->addAction(newTabAct);
     fileMenu->addAction(newFileAct);
     fileMenu->addAction(openFileAct);
+    fileMenu->addAction(openFolderAct);
     fileMenu->addAction(saveFileAct);
     fileMenu->addAction(saveFileAsAct);
     fileMenu->addSeparator();
@@ -141,16 +145,16 @@ void MainWindow::createHelpMenu()
 
 void MainWindow::createButtons()
 {
-    /*NEW TAB*/
-    newTabButton = new QPushButton(*newTabIcon, tr("New Tab"));
-    toolBar->addWidget(newTabButton);
-    connect(newTabButton, SIGNAL(clicked(bool)), this, SLOT(addTab()));
-    newTabButton->setToolTip(tr("New tab"));
+//    /*NEW TAB*/
+//    newTabButton = new QPushButton(*newTabIcon, tr("New Tab"));
+//    toolBar->addWidget(newTabButton);
+//    connect(newTabButton, SIGNAL(clicked(bool)), this, SLOT(addTab()));
+//    newTabButton->setToolTip(tr("New tab"));
 
     /* NEW FILE*/
     newFileButton = new QPushButton(*newFileIcon, tr("New File"));
     toolBar->addWidget(newFileButton);
-    connect(newFileButton, SIGNAL(clicked(bool)), this, SLOT(newFile()));
+    connect(newFileButton, SIGNAL(clicked(bool)), this, SLOT(addTab()));
     newFileButton->setToolTip(tr("Create new file"));
 
     /*SAVE*/
@@ -191,39 +195,51 @@ void MainWindow::createActions()
 
 void MainWindow::createFileActions()
 {
+    /* New Window Act */
     newWindowAct = new QAction(tr("&New Window"), this);
     newWindowAct->setShortcuts(QKeySequence::New);
     newWindowAct->setStatusTip(tr("Create a new window"));
 //    connect(newWindowAct, SIGNAL(triggered(bool)), this, SLOT(newWindow()));
 
-    newTabAct = new QAction(*newTabIcon, tr("New &Tab"), this);
-    newTabAct->setShortcuts(QKeySequence::AddTab);
-    newTabAct->setStatusTip(tr("Create new tab"));
-    connect(newTabAct, SIGNAL(triggered(bool)), this, SLOT(addTab()));
+//    newTabAct = new QAction(*newTabIcon, tr("New &Tab"), this);
+//    newTabAct->setShortcuts(QKeySequence::AddTab);
+//    newTabAct->setStatusTip(tr("Create new tab"));
+//    connect(newTabAct, SIGNAL(triggered(bool)), this, SLOT(addTab()));
 
+    /* New File */
     newFileAct = new QAction(*newFileIcon, tr("New F&ile"), this);
     newFileAct->setStatusTip(tr("Create new File"));
-//    connect(newFileAct, SIGNAL(triggered(bool)), this, SLOT(newFile()));
+    connect(newFileAct, SIGNAL(triggered(bool)), this, SLOT(addTab()));
 
+    /* New Project */
     newProjectAct = new QAction(*newFileIcon, tr("New P&roject"), this);
     newProjectAct->setStatusTip("Create new cmake Project");
 //    connect(newProjectAct, SIGNAL(triggered(bool)), this, SLOT(newProject()));
 
+    /* Open File */
     openFileAct = new QAction(*openIcon, tr("&Open File"), this);
     openFileAct->setShortcut(QKeySequence::Open);
     openFileAct->setStatusTip(tr("Open existing File"));
     connect(openFileAct, SIGNAL(triggered(bool)), this, SLOT(openFile()));
 
+    /* Open Folder */
+    openFolderAct = new QAction(*openIcon, tr("&Open Folder"), this);
+    openFolderAct->setStatusTip(tr("Open existing Folder"));
+    connect(openFolderAct, SIGNAL(triggered(bool)), this, SLOT(openFolder()));
+
+    /* Save File */
     saveFileAct = new QAction(*saveIcon, tr("&Save"), this);
     saveFileAct->setShortcut(QKeySequence::Save);
     saveFileAct->setStatusTip(tr("Save a file"));
     connect(saveFileAct, SIGNAL(triggered(bool)), this, SLOT(saveFile()));
 
+    /* Save As File */
     saveFileAsAct = new QAction(*saveAsIcon, tr("Save as"), this);
     saveFileAsAct->setShortcut(QKeySequence::SaveAs);
     saveFileAsAct->setStatusTip(tr("Save as file"));
     connect(saveFileAsAct, SIGNAL(triggered(bool)), this, SLOT(saveAsFile()));
 
+    /* Exit Application */
     exitAct = new QAction(tr("Exit"), this);
     exitAct->setShortcut(QKeySequence::Quit);
     exitAct->setStatusTip(tr("Close current window"));
@@ -285,6 +301,11 @@ void MainWindow::newWindow()
 
 void MainWindow::newFile()
 {
+    Editor *currentEditor = dynamic_cast<Editor*>(editorTabs->currentWidget());
+    /* if current editor is not empty create new tab */
+    if (!currentEditor->document()->toPlainText().isEmpty()) {
+        this->addTab();
+    }
 
 }
 
@@ -295,6 +316,7 @@ void MainWindow::newProject()
 
 void MainWindow::saveFile()
 {
+    /*cast current tab widget to Editor*/
     Editor *currentEditor = dynamic_cast<Editor*>(editorTabs->currentWidget());
     QString openedFileName = currentEditor->getOpenedFileName();
 
@@ -405,6 +427,19 @@ void MainWindow::openFile()
                 }
             }
         }
+}
+
+void MainWindow::openFolder()
+{
+    QString home = QProcessEnvironment::systemEnvironment().value("HOME", "/");
+    QString dirPath = QFileDialog::getExistingDirectory(this, tr("Open Folder"), home);
+
+    if(dirPath.isEmpty()){
+        return;
+    }
+    else {
+        this->fileManager->setDir(dirPath);
+    }
 }
 
 void MainWindow::openFile(QString path)
