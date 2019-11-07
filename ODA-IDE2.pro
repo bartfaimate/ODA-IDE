@@ -32,7 +32,8 @@ SOURCES += \
     tab.cpp \
     editor.cpp \
     highlighter.cpp \
-    statusbar.cpp
+    statusbar.cpp \
+    terminal.cpp
     unittests/unittests.cpp
     
 HEADERS += \
@@ -42,7 +43,8 @@ HEADERS += \
     tab.h \
     editor.h \
     highlighter.h \
-    statusbar.h
+    statusbar.h \
+    terminal.h
 
 
 

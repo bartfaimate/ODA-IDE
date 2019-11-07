@@ -84,7 +84,7 @@ void MainWindow::createLayout()
     this->outputTabs->addTab(new QWidget(), tr("Terminal"));
 
     connect(this->editorTabs, SIGNAL(currentChanged(int)), this, SLOT(updateStatusbar(int)));
-    connect(this->fileManager, SIGNAL(filePath(QString)), this, SLOT(openFile(QString)));
+    connect(this->fileManager, SIGNAL(signalFilePath(QString)), this, SLOT(openFile(QString)));
 
 }
 
@@ -506,8 +506,28 @@ void MainWindow::saveSettings()
     settings.setValue("window/horizontal_splitter", this->horizontalSplitter->saveState());
     settings.setValue("theme", "default.css");
 
+    QStringList openedFiles;
+    for(int i = 0; i < editorTabs->count(); i++) {
+        editorTabs->setCurrentIndex(i);
+        Editor *currentEditor = dynamic_cast<Editor*>(editorTabs->currentWidget());
+        openedFiles.append(currentEditor->getOpenedFileName());
+    }
+
+    settings.setValue("openedfiles", openedFiles);
+
+
+    settings.setValue("openedfolder", fileManager->getCurrentDirecotry());
+
 }
 
+/**
+ * @brief MainWindow::loadSettings
+ * save settings when closing window
+ * window geometry
+ * splitter states
+ * opened files name
+ * and the filemanagers current direcotry
+ */
 void MainWindow::loadSettings()
 {
     if(QFile::exists(QString("configs/config.ini"))) {
@@ -522,11 +542,27 @@ void MainWindow::loadSettings()
         state = settings.value("window/horizontal_splitter").toByteArray();
         this->horizontalSplitter->restoreState(state);
 //        settings.setValue("theme", "default.css");
+
+        try {
+            QStringList openedFiles = settings.value("openedfiles").toStringList();
+
+            for(int i = 0; i < openedFiles.length(); i++){
+                openFile(openedFiles.at(i));
+            }
+        } catch(...) {
+            qDebug() << "Couldnt open last session\n";
+        }
+        fileManager->setDir(settings.value("openedfolder").toString());
     }
 }
 
 
 void MainWindow::openSettingsWindow()
+{
+
+}
+
+void MainWindow::saveLastSession()
 {
 
 }

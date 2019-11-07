@@ -1,0 +1,217 @@
+#include <QtWidgets>
+#include <string>
+
+#include "editor.h"
+#include "highlighter.h"
+
+//![constructor]
+Editor::Editor(QWidget *parent) : QPlainTextEdit(parent)
+{
+    lineNumberArea = new LineNumberArea(this);
+
+    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
+    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
+    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLineWrapper()));
+    //connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(getLineIndent()));
+}
+
+int lineNumberAreaWidth()
+{
+    int digits = 1;
+    int max = qMax(1, blockCount());
+    while (max >= 10) {
+        max /= 10;
+        ++digits;
+    }
+
+    int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits;
+
+    return space;
+}
+
+
+void Editor::setFontSettings(QString fontFamily, int fontSize, int tabWidth = 4){
+    font = new QFont();
+    font->setFamily(fontFamily);
+    font->setStyleHint(QFont::Monospace);
+    font->setFixedPitch(true);
+    font->setPointSize(fontSize);
+    this->setFont(*font);
+
+    metrics = new QFontMetrics(*font);
+    this->setTabStopWidth(tabWidth * metrics->width(" "));
+    this->tabWidth = tabWidth;
+}
+
+
+
+{
+    QString pattern = "((\\w)+(\\.)?(\\w)+)$";   //ok but filename with 2 dots not working
+    QRegularExpression regEx(pattern);
+    QRegularExpressionMatch match = regEx.match(this->openedFileName);
+    QString matched;
+    if (match.hasMatch()) {
+        matched = match.captured(1);    //
+    }
+    else {
+        matched = " ";
+    }
+    return matched;
+}
+
+/**
+ * @brief Editor::setOpenedFileName
+ * @param openedFileName
+ */
+void Editor::setOpenedFileName(QString openedFileName)
+{
+    this->openedFileName = openedFileName;
+}
+
+void Editor::setFileNameAndExtension(QString openedFileName)
+{
+    setOpenedFileName(openedFileName);
+    setFileExtension();
+}
+
+//![extraAreaWidth]
+
+//![slotUpdateExtraAreaWidth]
+
+void Editor::updateLineNumberAreaWidth(int /* newBlockCount */)
+{
+    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+}
+
+//![slotUpdateExtraAreaWidth]
+
+//![slotUpdateRequest]
+
+void Editor::updateLineNumberArea(const QRect &rect, int dy)
+{
+    if (dy)
+        lineNumberArea->scroll(0, dy);
+    else
+        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+
+    if (rect.contains(viewport()->rect()))
+        updateLineNumberAreaWidth(0);
+}
+
+void Editor::openFile(QString fileName)
+{
+    QFile *file = new QFile(fileName);
+    if (!file->open(QIODevice::ReadOnly | QIODevice::Text)){
+        QErrorMessage *fileError = new QErrorMessage();
+        fileError->showMessage(tr("ERROR by opening file"));
+    }
+
+    Highlighter *currentHighlighter = new Highlighter(this->document());
+    this->setFileNameAndExtension(fileName);
+    currentHighlighter->setupRule(this->getFileExtension());
+
+    QString info = ">> " + fileName + " opened\n";
+
+    QTextStream *readFile = new QTextStream(file);
+    this->document()->setPlainText(readFile->readAll());
+    file->flush();
+    file->close();
+    emit(this->filenameChanged(fileName));
+//    this->setFileExtension();
+}
+
+void Editor::saveFile(QString fileName)
+{
+
+}
+
+void Editor::newFile(QString fileName)
+{
+    QFile *file = new QFile(fileName);
+    if (!file->open(QIODevice::WriteOnly | QIODevice::Text)){
+        QErrorMessage *fileError = new QErrorMessage();
+        fileError->showMessage(tr("ERROR by saving"));
+        return;
+    }
+    this->setFileNameAndExtension(fileName);
+    Highlighter *currentHighlighter = new Highlighter(this->document());
+    currentHighlighter->setupRule(this->getFileExtension());
+
+    this->clear();
+    file->close();
+}
+
+
+
+/**
+ * @brief Editor::getLightenValue
+ * @return
+ */
+int Editor::getLightenValue()
+{
+    return this->lightenValue;
+}
+
+/**
+ * @brief Editor::setLightenValue
+ * @param lighten
+ */
+void Editor::setLightenValue(int lighten)
+{
+    this->lightenValue = lighten;
+}
+
+/**
+ * @brief Editor::getHighlightColor
+ * @return
+ */
+QString Editor::getHighlightColor()
+{
+    return this->highlightColor;
+}
+
+/**
+ * @brief Editor::setHighlightColor
+ * @param color
+ */
+void Editor::setHighlightColor(QString color)
+{
+    this->highlightColor = color;
+}
+
+/**
+ * @brief Editor::setFontFamily
+ * @param fontFamily
+ */
+void Editor::setFontFamily(QString fontFamily)
+{
+    this->fontFamily = fontFamily;
+}
+
+/**
+ * @brief Editor::getFontFamily
+ * @return
+ */
+QString Editor::getFontFamily()
+{
+    return this->fontFamily;
+}
+
+/**
+ * @brief Editor::setTabWidth
+ * @param tabWidth
+ */
+void Editor::setTabWidth(int tabWidth)
+{
+    this->tabWidth = tabWidth;
+}
+
+/**
+ * @brief Editor::getTabWidth
+ * @return
+ */
+int Editor::getTabWidth()
+{
+    return this->tabWidth;
+}
+

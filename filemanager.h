@@ -9,6 +9,10 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QProcessEnvironment>
+#include <QTreeWidgetItem>
+#include <QMenu>
+#include <QMouseEvent>
+#include <QAbstractItemView>
 
 class FileManager : public QTreeView
 {
@@ -19,17 +23,36 @@ public:
     ~FileManager();
 
     bool fileExist(QString path);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+
+    QString getCurrentDirecotry();
+    void setCurrentDirecotry(QString dir);
+
 
 signals:
-    void filePath(QString);
+    void signalFilePath(QString);
 
 public slots:
     void pathEmitter(const QModelIndex & index);
     void printPath(const QModelIndex &index);
     void setDir(QString dirPath);
 
+    bool createNewFile(QModelIndex &index);
+    void renameFile();
+
 private:
     QFileSystemModel *model;
+    QModelIndex index;
+    QAction *newFileAct;
+    QAction *newFolderAct;
+    QAction *newRenameAct;
+    QAction *removeAct;
+
+    QString currentDirectory;
+
+
+    void createActions();
 };
 
 #endif // FILEMANAGER_H

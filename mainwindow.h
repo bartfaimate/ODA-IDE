@@ -147,6 +147,7 @@ public slots:
     void loadSettings();
     void openSettingsWindow();
 
+    void saveLastSession();
     void undo();
     void redo();
 

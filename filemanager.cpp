@@ -7,8 +7,12 @@ FileManager::FileManager(QWidget *parent) : QTreeView (parent)
 
     QString home = QProcessEnvironment::systemEnvironment().value("HOME", "/");
 //    model->setRootPath( home);
+    this->setSortingEnabled(true);
     this->setModel(model);
     this->setRootIndex(model->setRootPath(home));
+
+    this->setCurrentDirecotry(home);
+
     /* sort by name */
     model->setFilter(QDir::AllDirs | QDir::AllEntries |QDir::NoDotAndDotDot );
 
@@ -20,12 +24,11 @@ FileManager::FileManager(QWidget *parent) : QTreeView (parent)
     this->setSortingEnabled(true);
     this->setIndentation(10);
 
-
     this->hideColumn(1);
     this->hideColumn(2);
     this->hideColumn(3);
 
-
+    createActions();
     connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(printPath(QModelIndex)));
     connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(pathEmitter(QModelIndex)));
 }
@@ -51,6 +54,76 @@ bool FileManager::fileExist(QString path)
     }
 }
 
+void FileManager::mouseReleaseEvent(QMouseEvent *event)
+{
+//    if (event->button() == Qt::RightButton) {
+
+//            if (NULL != this->childAt(event->pos()) ) {
+//                QMenu m;
+//                m.addAction("Create File");
+//                m.addAction("Create Folder");
+//                m.addAction("Delete");
+
+
+//                QAction *selected = m.exec(mapToGlobal(event->pos()));
+//                if (selected) {
+
+//                    qDebug() << "selected" << selected->text() << event->pos();
+//                }
+//            }
+//        } else {
+//            QTreeView::mouseReleaseEvent(event);
+//    }
+}
+
+void FileManager::mousePressEvent(QMouseEvent *event)
+{
+
+    index = this->indexAt(event->pos());
+    if (event->button() == Qt::LeftButton) {
+
+        QTreeView::mousePressEvent(event);
+
+    }
+    if (event->button() == Qt::RightButton) {
+
+            qDebug() << "Row" << index.row() << index.column();
+            qDebug() << model->fileName(index);
+            if (NULL != this->childAt(event->pos()) ) {
+                QMenu m;
+                m.addAction(newFileAct);
+                m.addAction(newFolderAct);
+                m.addAction(newRenameAct);
+                if(model->isDir(index)) {
+                    m.addAction("Delete folder");
+                } else {
+                    m.addAction("Delete file");
+                }
+
+
+                QAction *selected = m.exec(mapToGlobal(event->pos()));
+                if (selected) {
+
+                    qDebug() << "selected" << selected->text() << event->pos();
+                }
+            }
+        }
+    else {
+            QTreeView::mouseReleaseEvent(event);
+    }
+
+}
+
+QString FileManager::getCurrentDirecotry()
+{
+    return this->currentDirectory;
+}
+
+void FileManager::setCurrentDirecotry(QString dir)
+{
+    this->currentDirectory = dir;
+}
+
 /**
  * @brief FileManager::pathEmitter emits a signal if doubleclicked the model element and it is a file
  * @param index
@@ -59,7 +132,7 @@ void FileManager::pathEmitter(const QModelIndex &index)
 {
     QString path = model->filePath(index);
     if (fileExist(path)) {
-        emit filePath(model->filePath(index));
+        emit signalFilePath(model->filePath(index));
     }
 }
 
@@ -72,4 +145,30 @@ void FileManager::printPath(const QModelIndex &index)
 void FileManager::setDir(QString dirPath)
 {
     this->setRootIndex(model->setRootPath(dirPath));
+    this->currentDirectory = dirPath;
 }
+
+bool FileManager::createNewFile(QModelIndex &index)
+{
+
+}
+
+void FileManager::renameFile()
+{
+
+}
+
+void FileManager::createActions()
+{
+    newFileAct = new QAction(tr("New F&ile"), this);
+//    newFileAct->setStatusTip(tr("Create new File"));
+//    connect(newFileAct, SIGNAL(triggered(bool)), this, SLOT());
+
+    newFolderAct = new QAction("New folder");
+    newRenameAct = new QAction("Rename");
+    connect(newRenameAct, SIGNAL(triggered(bool)), this, SLOT(renameFile()));
+
+    removeAct = new QAction();
+}
+
+
