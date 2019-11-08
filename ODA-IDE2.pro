@@ -8,7 +8,7 @@ QT       += core gui widgets testlib
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = ODA-IDE2
+TARGET = ODA-IDE
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -26,27 +26,28 @@ CONFIG += c++11
 
 SOURCES += \
     filemanager.cpp \
-        main.cpp \
-        mainwindow.cpp \
+    main.cpp \
+    mainwindow.cpp \
     settings.cpp \
     tab.cpp \
     editor.cpp \
     highlighter.cpp \
     statusbar.cpp \
-    terminal.cpp
-    unittests/unittests.cpp
+#    terminal.cpp
+#    unittests/unittests.cpp
     
 HEADERS += \
     filemanager.h \
-        mainwindow.h \
+    mainwindow.h \
     settings.h \
     tab.h \
     editor.h \
     highlighter.h \
     statusbar.h \
-    terminal.h
+#    terminal.h
 
-
+LIBS += -lqtermwidget5
+#INCLUDEPATH += /usr/include/
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

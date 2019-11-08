@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include "highlighter.h"
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -79,12 +80,21 @@ void MainWindow::createLayout()
 
     this->editorTabs->addTab(new Editor(), tr("New File"));      /* add the first tab with editor */
 
+    this->createTerminal();
+    this->outputTabs->addTab(console, tr("Terminal"));
     this->outputTabs->addTab(new QWidget(), tr("Debug"));
     this->outputTabs->addTab(new QWidget(), tr("Output"));
-    this->outputTabs->addTab(new QWidget(), tr("Terminal"));
+
+//    QWidget *console = new odaide::Terminal();
+//    consoleThread = new odaide::TerminalThread(console);
+
+
+
+
 
     connect(this->editorTabs, SIGNAL(currentChanged(int)), this, SLOT(updateStatusbar(int)));
     connect(this->fileManager, SIGNAL(signalFilePath(QString)), this, SLOT(openFile(QString)));
+//    consoleThread->start();
 
 }
 
@@ -292,6 +302,16 @@ void MainWindow::createHelpActions()
 {
     aboutAct = new QAction(tr("About"), this);
     aboutQtAct = new QAction(tr("About Qt"), this);
+}
+
+void MainWindow::createTerminal()
+{
+    console = new QTermWidget();
+    QFont font = QFont();
+    font.setFamily("Monospace");
+    font.setPointSize(12);
+    console->setTerminalFont(font);
+    console->setColorScheme("Solarized");
 }
 
 void MainWindow::newWindow()
