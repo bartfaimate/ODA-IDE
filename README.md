@@ -2,6 +2,13 @@
 
 This is a simply IDE for C and C++ development.
 
+## Dependencies
+
+Install QTermwidget from source
+QTermWidget [link|https://github.com/lxqt/qtermwidget]
+
+or from your distro manager
+```sudo apt-get install libqtermwidget5-0  libqtermwidget5-0-dev```
 
 ## Compile
 

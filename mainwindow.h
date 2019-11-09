@@ -20,6 +20,9 @@
 #include "editor.h"
 #include "statusbar.h"
 #include "filemanager.h"
+//#include "terminal.h"
+#include "qtermwidget5/qtermwidget.h"
+
 
 class MainWindow : public QMainWindow
 {
@@ -112,6 +115,10 @@ private:
 
     FileManager *fileManager;
 
+    QTermWidget *console;
+
+//    odaide::TerminalThread *consoleThread;
+
 private:
     void createLayout();
     void createMenus();
@@ -130,6 +137,8 @@ private:
     void createEditActions();
     void createCompileActions();
     void createHelpActions();
+
+    void createTerminal();
 //    void createStatusbar(int height);
 
 public slots:
