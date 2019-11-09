@@ -89,13 +89,9 @@ void MainWindow::createLayout()
     this->outputTabs->addTab(new QWidget(), tr("Debug"));
     this->outputTabs->addTab(new QWidget(), tr("Output"));
 
-//    QWidget *console = new odaide::Terminal();
-//    consoleThread = new odaide::TerminalThread(console);
-
     /* connecting signals */
     connect(this->editorTabs, SIGNAL(currentChanged(int)), this, SLOT(updateStatusbar(int)));
     connect(this->fileManager, SIGNAL(signalFilePath(QString)), this, SLOT(openFile(QString)));
-//    consoleThread->start();
 
 }
 
