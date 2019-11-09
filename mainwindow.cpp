@@ -3,14 +3,18 @@
 #include <QLabel>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QDir>
 #include "highlighter.h"
 
+#include "utilities.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     this->setGeometry(100, 100, 640, 480);
 
+    this->configFolder = QProcessEnvironment::systemEnvironment().value("HOME", "~") +
+            "/.odaide/configs/";
     this->createLayout();
     this->createActions();
     this->createMenus();
@@ -88,16 +92,17 @@ void MainWindow::createLayout()
 //    QWidget *console = new odaide::Terminal();
 //    consoleThread = new odaide::TerminalThread(console);
 
-
-
-
-
+    /* connecting signals */
     connect(this->editorTabs, SIGNAL(currentChanged(int)), this, SLOT(updateStatusbar(int)));
     connect(this->fileManager, SIGNAL(signalFilePath(QString)), this, SLOT(openFile(QString)));
 //    consoleThread->start();
 
 }
 
+/**
+ * @brief MainWindow::createMenus
+ * creates the menus for the main window
+ */
 void MainWindow::createMenus()
 {
     createFileMenu();
@@ -519,25 +524,33 @@ void MainWindow::saveGeometry()
 
 void MainWindow::saveSettings()
 {
-    QSettings settings(QString("configs/config.ini"), QSettings::IniFormat);
-
-    settings.setValue("window/geometry", this->geometry());
-    settings.setValue("window/vertical_splitter", this->verticalSplitter->saveState());
-    settings.setValue("window/horizontal_splitter", this->horizontalSplitter->saveState());
-    settings.setValue("theme", "default.css");
-
-    QStringList openedFiles;
-    for(int i = 0; i < editorTabs->count(); i++) {
-        editorTabs->setCurrentIndex(i);
-        Editor *currentEditor = dynamic_cast<Editor*>(editorTabs->currentWidget());
-        openedFiles.append(currentEditor->getOpenedFileName());
+    QString savePath = this->configFolder + configFile;
+    if(! Utilities::existsDirecotry(this->configFolder)) {
+        qDebug() << "Creating directory " << this->configFolder << "\n";
+        QDir().mkdir(this->configFolder);
     }
+    try{
+        QSettings settings(savePath, QSettings::IniFormat);
 
-    settings.setValue("openedfiles", openedFiles);
+        settings.setValue("window/geometry", this->geometry());
+        settings.setValue("window/vertical_splitter", this->verticalSplitter->saveState());
+        settings.setValue("window/horizontal_splitter", this->horizontalSplitter->saveState());
+        settings.setValue("theme", "default.css");
+
+        QStringList openedFiles;
+        for(int i = 0; i < editorTabs->count(); i++) {
+            editorTabs->setCurrentIndex(i);
+            Editor *currentEditor = dynamic_cast<Editor*>(editorTabs->currentWidget());
+            openedFiles.append(currentEditor->getOpenedFileName());
+        }
+
+        settings.setValue("openedfiles", openedFiles);
 
 
-    settings.setValue("openedfolder", fileManager->getCurrentDirecotry());
-
+        settings.setValue("openedfolder", fileManager->getCurrentDirecotry());
+    } catch (...) {
+        qDebug() << "Saving settings was not succesful\n";
+    }
 }
 
 /**
@@ -550,29 +563,36 @@ void MainWindow::saveSettings()
  */
 void MainWindow::loadSettings()
 {
-    if(QFile::exists(QString("configs/config.ini"))) {
+    QString savePath = this->configFolder + configFile;
 
-        QSettings settings(QString("configs/config.ini"), QSettings::IniFormat);
+    try {
 
-        QRect geometry =  settings.value("window/geometry", this->geometry()).toRect();
-        this->setGeometry(geometry);
+        if(QFile::exists(QString(savePath))) {
 
-        QByteArray state = settings.value("window/vertical_splitter").toByteArray();
-        this->verticalSplitter->restoreState(state);
-        state = settings.value("window/horizontal_splitter").toByteArray();
-        this->horizontalSplitter->restoreState(state);
-//        settings.setValue("theme", "default.css");
+            QSettings settings(QString(savePath), QSettings::IniFormat);
 
-        try {
-            QStringList openedFiles = settings.value("openedfiles").toStringList();
+            QRect geometry =  settings.value("window/geometry", this->geometry()).toRect();
+            this->setGeometry(geometry);
 
-            for(int i = 0; i < openedFiles.length(); i++){
-                openFile(openedFiles.at(i));
+            QByteArray state = settings.value("window/vertical_splitter").toByteArray();
+            this->verticalSplitter->restoreState(state);
+            state = settings.value("window/horizontal_splitter").toByteArray();
+            this->horizontalSplitter->restoreState(state);
+    //        settings.setValue("theme", "default.css");
+
+            try {
+                QStringList openedFiles = settings.value("openedfiles").toStringList();
+
+                for(int i = 0; i < openedFiles.length(); i++){
+                    openFile(openedFiles.at(i));
+                }
+            } catch(...) {
+                qDebug() << "Couldnt open last session\n";
             }
-        } catch(...) {
-            qDebug() << "Couldnt open last session\n";
+            fileManager->setDir(settings.value("openedfolder").toString());
         }
-        fileManager->setDir(settings.value("openedfolder").toString());
+    } catch(...) {
+        qDebug() << "Couldnt open last session" << savePath <<"\n";
     }
 }
 
