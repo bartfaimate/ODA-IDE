@@ -42,6 +42,9 @@ private:
     QString title = tr("ODA-IDE");
     QString iconPath = "./icons/1x/";
 
+    QString configFolder = "configs/";
+    QString configFile = "config.ini";
+
     QString settingsPath = "configs/settings.ini";
 
     QList<QString> *openedFiles;

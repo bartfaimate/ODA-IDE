@@ -35,7 +35,8 @@ SOURCES += \
     statusbar.cpp \
 #    terminal.cpp
 #    unittests/unittests.cpp
-    
+     \
+    utilities.cpp
 HEADERS += \
     filemanager.h \
     mainwindow.h \
@@ -44,7 +45,8 @@ HEADERS += \
     editor.h \
     highlighter.h \
     statusbar.h \
-#    terminal.h
+ \#    terminal.h
+    utilities.h
 
 LIBS += -lqtermwidget5
 #INCLUDEPATH += /usr/include/
