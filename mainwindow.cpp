@@ -8,6 +8,7 @@
 
 #include "utilities.h"
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -15,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->configFolder = QProcessEnvironment::systemEnvironment().value("HOME", "~") +
             "/.odaide/configs/";
+
+    this->baseFolder = QProcessEnvironment::systemEnvironment().value("HOME", "~") + "/.odaide/";
     this->createLayout();
     this->createActions();
     this->createMenus();
@@ -63,6 +66,7 @@ void MainWindow::createLayout()
     editorTabs->setTabsClosable(true);
     connect(editorTabs, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
 
+    // create tabs for the output messages
     outputTabs = new QTabWidget();
     outputTabs->setMovable(true);
     verticalSplitter->addWidget(editorTabs);
@@ -82,6 +86,7 @@ void MainWindow::createLayout()
     hBoxLayout->addWidget(toolBar);
     this->setLayout(hBoxLayout);
 
+    // create the editor tab widget and add a new Editor
     this->editorTabs->addTab(new Editor(), tr("New File"));      /* add the first tab with editor */
 
     this->createTerminal();
@@ -91,6 +96,7 @@ void MainWindow::createLayout()
 
     /* connecting signals */
     connect(this->editorTabs, SIGNAL(currentChanged(int)), this, SLOT(updateStatusbar(int)));
+    connect(this->editorTabs, SIGNAL(currentChanged(int)), this, SLOT(setCurrentEditor()));
     connect(this->fileManager, SIGNAL(signalFilePath(QString)), this, SLOT(openFile(QString)));
 
 }
@@ -133,6 +139,18 @@ void MainWindow::createEditMenu()
     editMenu->addAction(copyAct);
     editMenu->addAction(pasteAct);
 
+    /* undo */
+    connect(undoAct, SIGNAL(triggered(bool)), this, SLOT(undo()));
+    /* redo */
+    connect(redoAct, SIGNAL(triggered(bool)), this, SLOT(redo()));
+    /* cut */
+    connect(cutAct, SIGNAL(triggered(bool)), this, SLOT(cut()));
+    /* copy */
+    connect(copyAct, SIGNAL(triggered(bool)), this, SLOT(copy()));
+    /* paste */
+    connect(pasteAct, SIGNAL(triggered(bool)), this, SLOT(paste()));
+
+
 }
 
 void MainWindow::createCompileMenu()
@@ -152,6 +170,9 @@ void MainWindow::createHelpMenu()
     helpMenu = menuBar->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
     helpMenu->addAction(aboutQtAct);
+
+    connect(aboutAct, SIGNAL(triggered(bool)), this, SLOT(about()));
+    connect(aboutQtAct, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
 }
 
 void MainWindow::createButtons()
@@ -177,7 +198,7 @@ void MainWindow::createButtons()
     /* UNDO */
     undoButton = new QPushButton(*undoIcon, tr("Undo"));
     toolBar->addWidget(undoButton);
-//    connect(undoButton, SIGNAL(clicked(bool)), editorTabs, SLOT(undo()));
+    connect(undoButton, SIGNAL(clicked(bool)), this, SLOT(undo()));
     undoButton->setToolTip(tr("Undo"));
 
     compileButton = new QPushButton(*buildIcon, tr("Compile"));
@@ -305,6 +326,10 @@ void MainWindow::createHelpActions()
     aboutQtAct = new QAction(tr("About Qt"), this);
 }
 
+/**
+ * @brief MainWindow::createTerminal
+ * creates simple a terminal console which runs bash
+ */
 void MainWindow::createTerminal()
 {
     console = new QTermWidget();
@@ -313,6 +338,21 @@ void MainWindow::createTerminal()
     font.setPointSize(12);
     console->setTerminalFont(font);
     console->setColorScheme("Solarized");
+}
+
+void MainWindow::setCurrentEditor()
+{
+    currentEditorLock.lock();
+    this->currentEditor = dynamic_cast<Editor*>(editorTabs->currentWidget());
+    currentEditorLock.unlock();
+}
+
+void MainWindow::setCurrentEditor(int index)
+{
+    currentEditorLock.lock();
+    this->editorTabs->setCurrentIndex(index);
+    this->currentEditor = dynamic_cast<Editor*>(editorTabs->currentWidget());
+    currentEditorLock.unlock();
 }
 
 void MainWindow::newWindow()
@@ -605,12 +645,33 @@ void MainWindow::saveLastSession()
 
 void MainWindow::undo()
 {
+    Editor *currentEditor = dynamic_cast<Editor*>(this->editorTabs->currentWidget());
+    currentEditor->undo();
 
 }
 
 void MainWindow::redo()
 {
+    Editor *currentEditor = dynamic_cast<Editor*>(this->editorTabs->currentWidget());
+    currentEditor->redo();
+}
 
+void MainWindow::copy()
+{
+    Editor *currentEditor = dynamic_cast<Editor*>(this->editorTabs->currentWidget());
+    currentEditor->copy();
+}
+
+void MainWindow::cut()
+{
+    Editor *currentEditor = dynamic_cast<Editor*>(this->editorTabs->currentWidget());
+    currentEditor->cut();
+}
+
+void MainWindow::paste()
+{
+    Editor *currentEditor = dynamic_cast<Editor*>(this->editorTabs->currentWidget());
+    currentEditor->paste();
 }
 
 // TODO:
@@ -647,5 +708,37 @@ void MainWindow::closeWindow()
     qDebug() << "Exit\n";
     this->saveSettings();
     this->close();
+}
+
+/**
+ * Shows the  about info which is loaded from about.html file
+ */
+void MainWindow::about()
+{
+    try {
+        QFile aboutHtml(this->baseFolder + "about.html");
+        if (!aboutHtml.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            return;
+        }
+        QTextStream in(&aboutHtml);
+        QString content = in.readAll();
+
+        QMessageBox *aboutWindow = new QMessageBox();
+        aboutWindow->setInformativeText(content);
+        aboutWindow->setStandardButtons(QMessageBox::Ok);
+        int ret = aboutWindow->exec();
+    } catch(...) {
+        qDebug() << "Could not open about.html\n";
+        return;
+    }
+}
+
+/**
+ * @brief MainWindow::aboutQt
+ * shows the about qt message
+ */
+void MainWindow::aboutQt()
+{
+    QMessageBox::aboutQt(this);
 }
 
