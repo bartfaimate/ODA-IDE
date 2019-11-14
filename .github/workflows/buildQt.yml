@@ -15,7 +15,7 @@ jobs:
     - name: Run a multi-line script
       run: |
         echo "Installing qmake..."
-        apt-get install qt5-qmake -y
+        sudo apt-get install qt5-qmake -y
         echo "Running qmake..."
         qmake ODA-IDE2.pro
         echo "Qmake finished..."
