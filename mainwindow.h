@@ -151,6 +151,8 @@ private:
 
 //    void createStatusbar(int height);
 
+    void keyPressEvent(QKeyEvent *event);
+
 public slots:
     void newWindow();
     void newFile();

@@ -231,7 +231,7 @@ void MainWindow::createFileActions()
     newWindowAct = new QAction(tr("&New Window"), this);
     newWindowAct->setShortcuts(QKeySequence::New);
     newWindowAct->setStatusTip(tr("Create a new window"));
-//    connect(newWindowAct, SIGNAL(triggered(bool)), this, SLOT(newWindow()));
+    connect(newWindowAct, SIGNAL(triggered(bool)), this, SLOT(newWindow()));
 
 //    newTabAct = new QAction(*newTabIcon, tr("New &Tab"), this);
 //    newTabAct->setShortcuts(QKeySequence::AddTab);
@@ -340,6 +340,13 @@ void MainWindow::createTerminal()
     console->setColorScheme("Solarized");
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return){
+//        this->cu
+    }
+}
+
 void MainWindow::setCurrentEditor()
 {
     currentEditorLock.lock();
@@ -357,7 +364,8 @@ void MainWindow::setCurrentEditor(int index)
 
 void MainWindow::newWindow()
 {
-
+    MainWindow *newWindow = new MainWindow();
+    newWindow->show();
 }
 
 void MainWindow::newFile()
