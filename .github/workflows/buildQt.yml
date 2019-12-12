@@ -15,8 +15,9 @@ jobs:
     - name: Run a multi-line script
       run: |
         echo "Installing qmake..."
-        sudo apt-get install qt5-qmake libqt5core5a libqt5gui5 libqt5opengl5 libqt5opengl5-dev libqtermwidget5-0 \ 
-        libqtermwidget5-0-dev libqtermwidget5-data -y
+        echo "sudo apt-get install qt5-qmake libqt5core5a libqt5gui5 libqt5opengl5 libqt5opengl5-dev libqtermwidget5-0 libqtermwidget5-0-dev libqtermwidget5-data -y"
+        sudo apt-get install qt5-qmake libqt5core5a libqt5gui5 libqt5opengl5 libqt5opengl5-dev libqtermwidget5-0 libqtermwidget5-0-dev libqtermwidget5-data -y
+        
     - name: Run qmake
       run: |
         echo "changing directory to /home/runner/work/ODA-IDE/ODA-IDE"
