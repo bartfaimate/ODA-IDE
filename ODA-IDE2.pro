@@ -36,7 +36,9 @@ SOURCES += \
 #    terminal.cpp
 #    unittests/unittests.cpp
      \
-    utilities.cpp
+    utilities.cpp \
+    settingsdialog.cpp
+
 HEADERS += \
     filemanager.h \
     mainwindow.h \
@@ -46,7 +48,8 @@ HEADERS += \
     highlighter.h \
     statusbar.h \
  \#    terminal.h
-    utilities.h
+    utilities.h \
+    settingsdialog.h
 
 LIBS += -lqtermwidget5
 #INCLUDEPATH += /usr/include/
@@ -55,3 +58,6 @@ LIBS += -lqtermwidget5
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+
+DEFINES += "SETTINGS"

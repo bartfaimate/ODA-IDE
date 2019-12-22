@@ -15,6 +15,7 @@
 #include <QSettings>
 #include <QErrorMessage>
 #include <QFileDialog>
+#include <QMutex>
 
 //#include "tab.h"
 #include "editor.h"
@@ -43,6 +44,7 @@ private:
     QString iconPath = "./icons/1x/";
 
     QString configFolder = "configs/";
+    QString baseFolder;
     QString configFile = "config.ini";
 
     QString settingsPath = "configs/settings.ini";
@@ -114,11 +116,15 @@ private:
     QAction *aboutAct;
     QAction *aboutQtAct;
 
+    QMutex currentEditorLock;      /* this is a mutex for currentEditor. If it would be changed this lock must be set*/
+
     MainWindow *newWindows;
 
     FileManager *fileManager;
 
     QTermWidget *console;
+
+    Editor *currentEditor;
 
 //    odaide::TerminalThread *consoleThread;
 
@@ -142,7 +148,10 @@ private:
     void createHelpActions();
 
     void createTerminal();
+
 //    void createStatusbar(int height);
+
+    void keyPressEvent(QKeyEvent *event);
 
 public slots:
     void newWindow();
@@ -160,13 +169,21 @@ public slots:
     void openSettingsWindow();
 
     void saveLastSession();
+    void setCurrentEditor();
+    void setCurrentEditor(int index);
     void undo();
     void redo();
+    void copy();
+    void cut();
+    void paste();
 
     void updateStatusbar(int);
 
     void closeTab(int index);
     void closeWindow();
+
+    void about();
+    void aboutQt();
 
 
 //    void updateSettings();
