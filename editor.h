@@ -4,12 +4,14 @@
 #include <QPlainTextEdit>
 #include <QObject>
 #include <QString>
+#include <QCompleter>
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
 class QResizeEvent;
 class QSize;
 class QWidget;
+class QCompleter;
 QT_END_NAMESPACE
 
 class LineNumberArea;
@@ -35,11 +37,17 @@ public:
     QString getOpenedFileName();
     QString getShortFileName();
 
+    void setCompleter(QCompleter *c);
+    QCompleter *completer() const;
+
 protected:
     void resizeEvent(QResizeEvent *event) override;
+    void keyPressEvent(QKeyEvent *e) override;
+
 
 
 private slots:
+
     void updateLineNumberAreaWidth(int newBlockCount);
     void highlightCurrentLine();
     void highlightCurrentLine(QString highlightColor, int lighten);
@@ -69,6 +77,8 @@ private:
     int tabWidth;
     int fontSize;
     int lightenValue;
+
+
 
 
 public:

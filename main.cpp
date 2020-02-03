@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+using namespace  odaide;
+
 int main(int argc, char *argv[])
 {
 #ifdef IDE

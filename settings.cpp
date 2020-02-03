@@ -1,6 +1,8 @@
 #include "settings.h"
 #include <QSettings>
 
+using namespace odaide;
+
 Settings::Settings()
 {
 

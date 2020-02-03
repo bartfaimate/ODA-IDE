@@ -332,6 +332,41 @@ void Editor::resizeEvent(QResizeEvent *e)
     lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
+void Editor::keyPressEvent(QKeyEvent *e)
+{
+    if(e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return){
+        QString newLine;
+        QString endOfLine;
+        int cursorInLinePos;
+        qDebug() << "Enter pressed";
+        QTextCursor cursor = this->textCursor();
+
+        /* select the whole line */
+        cursor.select(QTextCursor::LineUnderCursor);
+        QString selectedLine = cursor.selectedText();
+//        cursor.clearSelection();
+        for(int i = 0; i < selectedLine.length(); i++) {
+            if(selectedLine[i] == "\t" || selectedLine[i] == " ") {
+                newLine.append(selectedLine[i]);        // append the tab or space
+            }
+            else {
+                break;
+            }
+        }
+        for(int i = cursor.block().position(); i < selectedLine.length() -1; i++){
+            endOfLine.append(selectedLine[i]);
+        }
+//        cursor.select(QTextCursor::SelectionType::WordUnderCursor);
+        cursor.clearSelection();
+        QPlainTextEdit::keyPressEvent(e);
+        cursor.insertText("" + newLine);
+//        QPlainTextEdit::keyPressEvent(e);
+     } else {
+        QPlainTextEdit::keyPressEvent(e);
+    }
+}
+
+
 int Editor::getLineIndent()
 {
     QString currentLine;
@@ -391,9 +426,6 @@ long Editor::lineCount()
     return this->document()->lineCount();
 }
 
-//![resizeEvent]
-
-//![cursorPositionChanged]
 
 void Editor::highlightCurrentLine()
 {
@@ -445,10 +477,6 @@ void Editor::highlightCurrentLineWrapper()
     highlightCurrentLine("gray", 180);
 }
 
-//![cursorPositionChanged]
-
-//![extraAreaPaintEvent_0]
-
 void Editor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(lineNumberArea);
@@ -478,4 +506,4 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent *event)
         ++blockNumber;
     }
 }
-//![extraAreaPaintEvent_2]
+

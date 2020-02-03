@@ -3,6 +3,12 @@
 #include <QFontComboBox>
 #include <QLabel>
 #include <QLineEdit>
+#include "settings.h"
+#include <QMap>
+#include <QDebug>
+
+
+using namespace odaide;
 
 SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 {
@@ -70,4 +76,18 @@ void SettingsDialog::createEditorSettingsTab()
 void SettingsDialog::createBuildSettingsTab()
 {
     buildSettings = new QWidget();
+}
+
+void SettingsDialog::saveSettings()
+{
+    QMap<QString, QVariant> whatToSave;
+    qDebug() << "saving settings to " << this->editorSettingsFile;
+
+    whatToSave["version"] = "0.1";
+    odaide::Settings::saveSettings(this->editorSettingsFile, whatToSave);
+}
+
+void SettingsDialog::processClick(QAbstractButton *button)
+{
+
 }

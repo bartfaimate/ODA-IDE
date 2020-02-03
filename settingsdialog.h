@@ -5,7 +5,10 @@
 #include <QDialog>
 #include <QTabWidget>
 #include <QDialogButtonBox>
+#include <QPushButton>
+#include <QButtonGroup>
 
+namespace odaide {
 class SettingsDialog : public QDialog
 {
     Q_OBJECT
@@ -18,15 +21,27 @@ private:
     void createEditorSettingsTab();
     void createBuildSettingsTab();
 
+
+
 private:
     QWidget *editorSettings;
     QWidget *buildSettings;
     QTabWidget *settingTabs;
     QDialogButtonBox *buttonBox;
 
+
+    QString configFolder = "configs/";
+    QString editorSettingsFile = configFolder + "editor_settings.ini";
+
 signals:
 
 public slots:
+    void saveSettings();
+
+private slots:
+    void processClick(QAbstractButton *button);
 };
+}
+
 
 #endif // SETTINGSDIALOG_H
