@@ -3,6 +3,8 @@
 # Project created by QtCreator 2019-09-14T12:11:30
 #
 #-------------------------------------------------
+QMAKE_CC = clang
+QMAKE_CXX = clang++
 
 QT       += core gui widgets testlib
 
@@ -22,7 +24,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG += c++11
+CONFIG += c++17
+QMAKE_CXXFLAGS += -std=c++1z
 
 SOURCES += \
     filemanager.cpp \
@@ -49,6 +52,7 @@ HEADERS += \
     utilities.h
 
 LIBS += -lqtermwidget5
+LIBS += -lstdc++fs
 #INCLUDEPATH += /usr/include/
 
 # Default rules for deployment.
