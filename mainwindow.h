@@ -15,6 +15,7 @@
 #include <QSettings>
 #include <QErrorMessage>
 #include <QFileDialog>
+#include <QMutex>
 
 //#include "tab.h"
 #include "editor.h"
@@ -116,9 +117,15 @@ private:
 
     MainWindow *newWindows;
 
+    QMutex tabLock;
+    QMutex settingsLock;
+
+
     FileManager *fileManager;
 
     QTermWidget *console;
+
+    QMap<QString, QString> fileTypeMapper;
 
 //    odaide::TerminalThread *consoleThread;
 
@@ -140,7 +147,7 @@ private:
     void createEditActions();
     void createCompileActions();
     void createHelpActions();
-
+    void createFileMapper();
     void createTerminal();
 //    void createStatusbar(int height);
 

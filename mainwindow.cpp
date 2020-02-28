@@ -11,6 +11,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    createFileMapper();
     this->setGeometry(100, 100, 640, 480);
 
     this->configFolder = QProcessEnvironment::systemEnvironment().value("HOME", "~") +
@@ -61,6 +62,7 @@ void MainWindow::createLayout()
     editorTabs = new QTabWidget();       /* tab widget to the splitter */
     editorTabs->setMovable(true);
     editorTabs->setTabsClosable(true);
+
     connect(editorTabs, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
 
     outputTabs = new QTabWidget();
@@ -305,6 +307,17 @@ void MainWindow::createHelpActions()
     aboutQtAct = new QAction(tr("About Qt"), this);
 }
 
+void MainWindow::createFileMapper()
+{
+    fileTypeMapper[".c"] = "C source";
+    fileTypeMapper[".h"] = "C header";
+    fileTypeMapper[".cpp"] = "C++ source";
+    fileTypeMapper[".hpp"] = "C++ header";
+    fileTypeMapper[".py"] = "Python source";
+    fileTypeMapper[".java"] = "Java source";
+
+}
+
 void MainWindow::createTerminal()
 {
     console = new QTermWidget();
@@ -484,17 +497,18 @@ void MainWindow::openFile(QString path)
 
                 emit(currentEditor->filenameChanged(path));
                 editorTabs->setTabText(editorTabs->currentIndex(), currentEditor->getShortFileName());
+                editorTabs->setTabToolTip(editorTabs->currentIndex(), currentEditor->getOpenedFileName());
                 windowStatusBar->setFileExtension(currentEditor->getFileExtension());   // set file extension and show in statusbar
 
             }
             catch (...){
-                std::cout << "error opening file" << std::endl;
+                std::cout << "[ERROR] opening file: " << path.toStdString() << std::endl;
 //                console->appendDebuginfo("[OPENFILE]: error opening file");
                 try {
                     file->close();
                 }
                 catch(...) {
-                    std::cout << "[OPEN:] file close error" << std::endl;
+                    std::cout << "[ERROR] file close error" << path.toStdString() << std::endl;
 //                    console->appendDebuginfo("[OPENFILE]: error closing file");
                 }
             }
@@ -504,12 +518,12 @@ void MainWindow::openFile(QString path)
 
 void MainWindow::addTab()
 {
-
-
+    tabLock.lock();
     this->editorTabs->addTab(new Editor(), tr("New File"));
     int tabCount = this->editorTabs->count();
     qDebug() << tabCount;
     this->editorTabs->setCurrentIndex(tabCount - 1);
+    tabLock.unlock();
 }
 
 void MainWindow::saveGeometry()
@@ -520,6 +534,8 @@ void MainWindow::saveGeometry()
 
 void MainWindow::saveSettings()
 {
+    settingsLock.lock();
+
     QString savePath = this->configFolder + configFile;
     if(! Utilities::existsDirecotry(this->configFolder)) {
         qDebug() << "Creating directory " << this->configFolder << "\n";
@@ -547,6 +563,7 @@ void MainWindow::saveSettings()
     } catch (...) {
         qDebug() << "Saving settings was not succesful\n";
     }
+    settingsLock.unlock();
 }
 
 /**
@@ -559,6 +576,7 @@ void MainWindow::saveSettings()
  */
 void MainWindow::loadSettings()
 {
+    settingsLock.lock();
     QString savePath = this->configFolder + configFile;
 
     try {
@@ -590,6 +608,7 @@ void MainWindow::loadSettings()
     } catch(...) {
         qDebug() << "Couldnt open last session" << savePath <<"\n";
     }
+    settingsLock.unlock();
 }
 
 
@@ -619,12 +638,14 @@ void MainWindow::updateStatusbar(int)
     Editor *newEditor = dynamic_cast<Editor*>(this->editorTabs->currentWidget());
 
     QString fileExtension = newEditor->getFileExtension();
-    windowStatusBar->setFileExtension(fileExtension);
+    windowStatusBar->setFileExtension(this->fileTypeMapper[fileExtension.toLower()]);
 
 }
 
 void MainWindow::closeTab(int index)
 {
+    tabLock.lock();
+
     std::cout << "close Tab clicked" << index << std::endl;
     int currentIndex = this->editorTabs->currentIndex();
     if (index <= currentIndex ) {
@@ -633,6 +654,7 @@ void MainWindow::closeTab(int index)
     this->editorTabs->removeTab(index);
     this->editorTabs->setCurrentIndex(currentIndex);
 
+    tabLock.unlock();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

@@ -4,6 +4,7 @@
 #include <QPlainTextEdit>
 #include <QObject>
 #include <QString>
+#include <QMutex>
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -69,6 +70,8 @@ private:
     int tabWidth;
     int fontSize;
     int lightenValue;
+
+    QMutex extensionLock;
 
 
 public:

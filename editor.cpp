@@ -3,6 +3,9 @@
 
 #include "editor.h"
 #include "highlighter.h"
+#include <experimental/filesystem>
+
+using namespace std::experimental ;
 
 //![constructor]
 Editor::Editor(QWidget *parent) : QPlainTextEdit(parent)
@@ -106,11 +109,10 @@ void Editor::setFontSettings(QString fontFaimily, int tabwidth = 4)
  */
 void Editor::setFileExtension()
 {
-    QRegularExpression regexp("(.)([a-zA-z0-9]+)$");
-    QRegularExpressionMatch match = regexp.match(this->openedFileName);
-    if(match.hasMatch()){
-        this->fileExtension = match.captured(2);
-    }
+    extensionLock.lock();
+    this->fileExtension = QString::fromStdString(std::experimental::filesystem::path(this->getOpenedFileName().toStdString()).extension().string());
+    qDebug() << fileExtension;
+    extensionLock.unlock();
 }
 
 QString Editor::getFileExtension()
