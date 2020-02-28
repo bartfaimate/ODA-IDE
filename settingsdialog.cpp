@@ -16,6 +16,9 @@ SettingsDialog::~SettingsDialog()
 
 }
 
+/**
+ * @brief SettingsDialog::setupLayout
+ */
 void SettingsDialog::setupLayout()
 {
     createEditorSettingsTab();
@@ -35,12 +38,18 @@ void SettingsDialog::setupLayout()
     layout->addWidget(buttonBox);
 }
 
+/**
+ * @brief SettingsDialog::connectSignals
+ */
 void SettingsDialog::connectSignals()
 {
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
+/**
+ * @brief SettingsDialog::createEditorSettingsTab
+ */
 void SettingsDialog::createEditorSettingsTab()
 {
     editorSettings = new QWidget();
@@ -67,6 +76,9 @@ void SettingsDialog::createEditorSettingsTab()
     layout->addWidget(fontComboBox);
 }
 
+/**
+ * @brief SettingsDialog::createBuildSettingsTab
+ */
 void SettingsDialog::createBuildSettingsTab()
 {
     buildSettings = new QWidget();
