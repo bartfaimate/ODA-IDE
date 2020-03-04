@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->configFolder = QProcessEnvironment::systemEnvironment().value("HOME", "~") +
             "/.odaide/configs/";
+    this->mapper = FileExtensionMapper::getInstance();
     this->createLayout();
     this->createActions();
     this->createMenus();
@@ -311,11 +312,13 @@ void MainWindow::createFileMapper()
 {
     fileTypeMapper[".c"] = "C source";
     fileTypeMapper[".h"] = "C header";
+    /* C++ files */
     fileTypeMapper[".cpp"] = "C++ source";
     fileTypeMapper[".hpp"] = "C++ header";
+    /* Python */
     fileTypeMapper[".py"] = "Python source";
+    /* Java */
     fileTypeMapper[".java"] = "Java source";
-
 }
 
 void MainWindow::createTerminal()
@@ -638,7 +641,7 @@ void MainWindow::updateStatusbar(int)
     Editor *newEditor = dynamic_cast<Editor*>(this->editorTabs->currentWidget());
 
     QString fileExtension = newEditor->getFileExtension();
-    windowStatusBar->setFileExtension(this->fileTypeMapper[fileExtension.toLower()]);
+    windowStatusBar->setFileExtension(this->mapper->extensionToString(fileExtension.toLower()));
 
 }
 

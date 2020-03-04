@@ -22,8 +22,8 @@
 #include "statusbar.h"
 #include "filemanager.h"
 //#include "terminal.h"
+#include "fileextensionmapper.h"
 #include "qtermwidget5/qtermwidget.h"
-
 
 class MainWindow : public QMainWindow
 {
@@ -122,6 +122,7 @@ private:
 
 
     FileManager *fileManager;
+    FileExtensionMapper *mapper;
 
     QTermWidget *console;
 

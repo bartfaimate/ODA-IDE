@@ -37,7 +37,8 @@ SOURCES += \
 #    terminal.cpp
 #    unittests/unittests.cpp
      \
-    utilities.cpp
+    utilities.cpp \
+    fileextensionmapper.cpp
 HEADERS += \
     filemanager.h \
     mainwindow.h \
@@ -47,7 +48,8 @@ HEADERS += \
     highlighter.h \
     statusbar.h \
  \#    terminal.h
-    utilities.h
+    utilities.h \
+    fileextensionmapper.h
 
 LIBS += -lqtermwidget5
 LIBS += -lstdc++fs
