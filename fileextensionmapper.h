@@ -6,6 +6,8 @@
 #include <QString>
 #include <QObject>
 
+namespace odaide {
+
 enum FileTypes{
     C_SOURCE,
     C_HEADER,
@@ -47,4 +49,5 @@ public:
 
 };
 
+} //namespace
 #endif // FILEEXTENSIONMAPPER_H

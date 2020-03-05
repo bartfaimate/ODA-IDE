@@ -25,6 +25,9 @@
 #include "fileextensionmapper.h"
 #include "qtermwidget5/qtermwidget.h"
 
+
+using namespace odaide;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

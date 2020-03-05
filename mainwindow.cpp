@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->configFolder = QProcessEnvironment::systemEnvironment().value("HOME", "~") +
             "/.odaide/configs/";
-    this->mapper = FileExtensionMapper::getInstance();
+    this->mapper = odaide::FileExtensionMapper::getInstance();
     this->createLayout();
     this->createActions();
     this->createMenus();
@@ -135,6 +135,14 @@ void MainWindow::createEditMenu()
     editMenu->addAction(cutAct);
     editMenu->addAction(copyAct);
     editMenu->addAction(pasteAct);
+
+
+    QMenu *fileTypeMenu = editMenu->addMenu(tr("Set Filetype"));
+    for(int i = 0; i <= FileTypes::OTHER; i++) {
+        QString strType = mapper->typeToString(static_cast<FileTypes>(i));
+        QAction *fileTypeAct = new QAction(strType);
+        fileTypeMenu->addAction(fileTypeAct);
+    }
 
 }
 
@@ -602,6 +610,7 @@ void MainWindow::loadSettings()
 
                 for(int i = 0; i < openedFiles.length(); i++){
                     openFile(openedFiles.at(i));
+                    this->updateStatusbar(i);
                 }
             } catch(...) {
                 qDebug() << "Couldnt open last session\n";
@@ -636,6 +645,9 @@ void MainWindow::redo()
 }
 
 // TODO:
+/**
+ * @param number of current tab
+ */
 void MainWindow::updateStatusbar(int)
 {
     Editor *newEditor = dynamic_cast<Editor*>(this->editorTabs->currentWidget());

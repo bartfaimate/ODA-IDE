@@ -1,8 +1,8 @@
 #include "fileextensionmapper.h"
 
-FileExtensionMapper* FileExtensionMapper::onlyInstance = nullptr;
+odaide::FileExtensionMapper* odaide::FileExtensionMapper::onlyInstance = nullptr;
 
-FileExtensionMapper::FileExtensionMapper()
+odaide::FileExtensionMapper::FileExtensionMapper()
 {
     /* C types */
     this->extensionToTypeMap[QString(".c")] = FileTypes::C_SOURCE;
@@ -62,7 +62,7 @@ FileExtensionMapper::FileExtensionMapper()
 
 }
 
-FileExtensionMapper *FileExtensionMapper::getInstance()
+odaide::FileExtensionMapper *odaide::FileExtensionMapper::getInstance()
 {
     if(onlyInstance == nullptr) {
         onlyInstance = new FileExtensionMapper();
@@ -71,19 +71,19 @@ FileExtensionMapper *FileExtensionMapper::getInstance()
     return onlyInstance;
 }
 
-FileTypes FileExtensionMapper::extensionToType(QString extension)
+odaide::FileTypes odaide::FileExtensionMapper::extensionToType(QString extension)
 {
     FileTypes type = this->extensionToTypeMap.value(extension, FileTypes::OTHER);
     return type;
 }
 
-QString FileExtensionMapper::typeToString(FileTypes fileType)
+QString odaide::FileExtensionMapper::typeToString(FileTypes fileType)
 {
     QString language = this->typeToStringMap.value(fileType, "text");
     return language;
 }
 
-QString FileExtensionMapper::extensionToString(QString extension)
+QString odaide::FileExtensionMapper::extensionToString(QString extension)
 {
     FileTypes type =  this->extensionToType(extension);
     QString str = this->typeToString(type);
