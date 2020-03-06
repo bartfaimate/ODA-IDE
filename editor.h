@@ -4,6 +4,8 @@
 #include <QPlainTextEdit>
 #include <QObject>
 #include <QString>
+#include <QMutex>
+#include "fileextensionmapper.h"
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -14,8 +16,12 @@ QT_END_NAMESPACE
 
 class LineNumberArea;
 
-//![codeeditordefinition]
+namespace odaide {
 
+
+/**
+ * @brief The Editor class
+ */
 class Editor : public QPlainTextEdit
 {
     Q_OBJECT
@@ -54,6 +60,9 @@ public slots:
     void saveFile(QString fileName);
     void newFile(QString fileName);
 
+    void setFileType(odaide::FileTypes fileType);
+    FileTypes getFileType();
+
 signals:
     void filenameChanged(QString);
 
@@ -70,6 +79,9 @@ private:
     int fontSize;
     int lightenValue;
 
+    QMutex extensionLock;
+    FileTypes currentFileType;
+
 
 public:
     int getLightenValue();
@@ -84,9 +96,10 @@ public:
     int getFontSize();
 };
 
-//![codeeditordefinition]
-//![extraarea]
 
+/**
+ * @brief The LineNumberArea class
+ */
 class LineNumberArea : public QWidget
 {
 public:
@@ -107,6 +120,6 @@ private:
     Editor *codeEditor;
 };
 
-//![extraarea]
+}
 
 #endif // EDITOR_H

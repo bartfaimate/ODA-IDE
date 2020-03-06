@@ -22,8 +22,11 @@
 #include "statusbar.h"
 #include "filemanager.h"
 //#include "terminal.h"
+#include "fileextensionmapper.h"
 #include "qtermwidget5/qtermwidget.h"
 
+
+using namespace odaide;
 
 class MainWindow : public QMainWindow
 {
@@ -120,11 +123,18 @@ private:
 
     MainWindow *newWindows;
 
+    QMutex tabLock;
+    QMutex settingsLock;
+
+
     FileManager *fileManager;
+    FileExtensionMapper *mapper;
 
     QTermWidget *console;
 
     Editor *currentEditor;
+
+    QMap<QString, QString> fileTypeMapper;
 
 //    odaide::TerminalThread *consoleThread;
 
@@ -146,7 +156,7 @@ private:
     void createEditActions();
     void createCompileActions();
     void createHelpActions();
-
+    void createFileMapper();
     void createTerminal();
 
 //    void createStatusbar(int height);

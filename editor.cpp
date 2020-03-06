@@ -3,9 +3,12 @@
 
 #include "editor.h"
 #include "highlighter.h"
+#include <experimental/filesystem>
 
-//![constructor]
-Editor::Editor(QWidget *parent) : QPlainTextEdit(parent)
+using namespace std::experimental ;
+
+
+odaide::Editor::Editor(QWidget *parent) : QPlainTextEdit(parent)
 {
     lineNumberArea = new LineNumberArea(this);
 
@@ -22,14 +25,12 @@ Editor::Editor(QWidget *parent) : QPlainTextEdit(parent)
 
 }
 
-//![constructor]
 
-//![extraAreaWidth]
 /**
  * @brief Editor::lineNumberAreaWidth
  * @return
  */
-int Editor::lineNumberAreaWidth()
+int odaide::Editor::lineNumberAreaWidth()
 {
     int digits = 1;
     int max = qMax(1, blockCount());
@@ -46,7 +47,7 @@ int Editor::lineNumberAreaWidth()
 /**
  * @brief Editor::setFontSettings
  */
-void Editor::setFontSettings()
+void odaide::Editor::setFontSettings()
 {
     QSettings settings(QString("configs/settings.ini"), QSettings::IniFormat); /* load settings */
     /* setup window position and size */
@@ -65,7 +66,7 @@ void Editor::setFontSettings()
     this->tabWidth = tabStop;
 }
 
-void Editor::setFontSettings(QString fontFamily, int fontSize, int tabWidth = 4)
+void odaide::Editor::setFontSettings(QString fontFamily, int fontSize, int tabWidth = 4)
 {
     font = new QFont();
     font->setFamily(fontFamily);
@@ -85,7 +86,7 @@ void Editor::setFontSettings(QString fontFamily, int fontSize, int tabWidth = 4)
  * @param fontFaimily
  * @param tabwidth
  */
-void Editor::setFontSettings(QString fontFaimily, int tabwidth = 4)
+void odaide::Editor::setFontSettings(QString fontFaimily, int tabwidth = 4)
 {
     font = new QFont();
     font->setFamily(fontFaimily);
@@ -104,16 +105,15 @@ void Editor::setFontSettings(QString fontFaimily, int tabwidth = 4)
  * @brief Editor::setFileExtension
  * @param fileName
  */
-void Editor::setFileExtension()
+void odaide::Editor::setFileExtension()
 {
-    QRegularExpression regexp("(.)([a-zA-z0-9]+)$");
-    QRegularExpressionMatch match = regexp.match(this->openedFileName);
-    if(match.hasMatch()){
-        this->fileExtension = match.captured(2);
-    }
+    extensionLock.lock();
+    this->fileExtension = QString::fromStdString(std::experimental::filesystem::path(this->getOpenedFileName().toStdString()).extension().string());
+    qDebug() << fileExtension;
+    extensionLock.unlock();
 }
 
-QString Editor::getFileExtension()
+QString odaide::Editor::getFileExtension()
 {
     return this->fileExtension;
 }
@@ -122,7 +122,7 @@ QString Editor::getFileExtension()
  * @brief Editor::getOpenedFileName
  * @return the filename the actual editor
  */
-QString Editor::getOpenedFileName()
+QString odaide::Editor::getOpenedFileName()
 {
     return this->openedFileName;
 }
@@ -131,7 +131,7 @@ QString Editor::getOpenedFileName()
  * @brief Editor::getShortFileName
  * @return
  */
-QString Editor::getShortFileName()
+QString odaide::Editor::getShortFileName()
 {
     QString pattern = "((\\w)+(\\.)?(\\w)+)$";   //ok but filename with 2 dots not working
     QRegularExpression regEx(pattern);
@@ -150,12 +150,14 @@ QString Editor::getShortFileName()
  * @brief Editor::setOpenedFileName
  * @param openedFileName
  */
-void Editor::setOpenedFileName(QString openedFileName)
+void odaide::Editor::setOpenedFileName(QString openedFileName)
 {
+    extensionLock.lock();
     this->openedFileName = openedFileName;
+    extensionLock.unlock();
 }
 
-void Editor::setFileNameAndExtension(QString openedFileName)
+void odaide::Editor::setFileNameAndExtension(QString openedFileName)
 {
     setOpenedFileName(openedFileName);
     setFileExtension();
@@ -165,7 +167,7 @@ void Editor::setFileNameAndExtension(QString openedFileName)
 
 //![slotUpdateExtraAreaWidth]
 
-void Editor::updateLineNumberAreaWidth(int /* newBlockCount */)
+void odaide::Editor::updateLineNumberAreaWidth(int /* newBlockCount */)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
@@ -174,7 +176,7 @@ void Editor::updateLineNumberAreaWidth(int /* newBlockCount */)
 
 //![slotUpdateRequest]
 
-void Editor::updateLineNumberArea(const QRect &rect, int dy)
+void odaide::Editor::updateLineNumberArea(const QRect &rect, int dy)
 {
     if (dy)
         lineNumberArea->scroll(0, dy);
@@ -185,17 +187,19 @@ void Editor::updateLineNumberArea(const QRect &rect, int dy)
         updateLineNumberAreaWidth(0);
 }
 
-void Editor::openFile(QString fileName)
+void odaide::Editor::openFile(QString fileName)
 {
     QFile *file = new QFile(fileName);
     if (!file->open(QIODevice::ReadOnly | QIODevice::Text)){
         QErrorMessage *fileError = new QErrorMessage();
         fileError->showMessage(tr("ERROR by opening file"));
     }
+    FileExtensionMapper *mapper = FileExtensionMapper::getInstance();
 
     Highlighter *currentHighlighter = new Highlighter(this->document());
     this->setFileNameAndExtension(fileName);
-    currentHighlighter->setupRule(this->getFileExtension());
+    this->setFileType(mapper->extensionToType(this->getFileExtension()));
+    currentHighlighter->setupRule(this->getFileType());
 
     QString info = ">> " + fileName + " opened\n";
 
@@ -207,12 +211,12 @@ void Editor::openFile(QString fileName)
 //    this->setFileExtension();
 }
 
-void Editor::saveFile(QString fileName)
+void odaide::Editor::saveFile(QString fileName)
 {
 
 }
 
-void Editor::newFile(QString fileName)
+void odaide::Editor::newFile(QString fileName)
 {
     QFile *file = new QFile(fileName);
     if (!file->open(QIODevice::WriteOnly | QIODevice::Text)){
@@ -228,13 +232,23 @@ void Editor::newFile(QString fileName)
     file->close();
 }
 
+void odaide::Editor::setFileType(odaide::FileTypes fileType)
+{
+    this->currentFileType = fileType;
+}
+
+odaide::FileTypes odaide::Editor::getFileType()
+{
+    return this->currentFileType;
+}
+
 
 
 /**
  * @brief Editor::getLightenValue
  * @return
  */
-int Editor::getLightenValue()
+int odaide::Editor::getLightenValue()
 {
     return this->lightenValue;
 }
@@ -243,7 +257,7 @@ int Editor::getLightenValue()
  * @brief Editor::setLightenValue
  * @param lighten
  */
-void Editor::setLightenValue(int lighten)
+void odaide::Editor::setLightenValue(int lighten)
 {
     this->lightenValue = lighten;
 }
@@ -252,7 +266,7 @@ void Editor::setLightenValue(int lighten)
  * @brief Editor::getHighlightColor
  * @return
  */
-QString Editor::getHighlightColor()
+QString odaide::Editor::getHighlightColor()
 {
     return this->highlightColor;
 }
@@ -261,7 +275,7 @@ QString Editor::getHighlightColor()
  * @brief Editor::setHighlightColor
  * @param color
  */
-void Editor::setHighlightColor(QString color)
+void odaide::Editor::setHighlightColor(QString color)
 {
     this->highlightColor = color;
 }
@@ -270,7 +284,7 @@ void Editor::setHighlightColor(QString color)
  * @brief Editor::setFontFamily
  * @param fontFamily
  */
-void Editor::setFontFamily(QString fontFamily)
+void odaide::Editor::setFontFamily(QString fontFamily)
 {
     this->fontFamily = fontFamily;
 }
@@ -279,7 +293,7 @@ void Editor::setFontFamily(QString fontFamily)
  * @brief Editor::getFontFamily
  * @return
  */
-QString Editor::getFontFamily()
+QString odaide::Editor::getFontFamily()
 {
     return this->fontFamily;
 }
@@ -288,7 +302,7 @@ QString Editor::getFontFamily()
  * @brief Editor::setTabWidth
  * @param tabWidth
  */
-void Editor::setTabWidth(int tabWidth)
+void odaide::Editor::setTabWidth(int tabWidth)
 {
     this->tabWidth = tabWidth;
 }
@@ -297,7 +311,7 @@ void Editor::setTabWidth(int tabWidth)
  * @brief Editor::getTabWidth
  * @return
  */
-int Editor::getTabWidth()
+int odaide::Editor::getTabWidth()
 {
     return this->tabWidth;
 }
@@ -306,7 +320,7 @@ int Editor::getTabWidth()
  * @brief Editor::setFontSize
  * @param fontSize
  */
-void Editor::setFontSize(int fontSize)
+void odaide::Editor::setFontSize(int fontSize)
 {
     this->fontSize = fontSize;
 }
@@ -315,16 +329,16 @@ void Editor::setFontSize(int fontSize)
  * @brief Editor::getFontSize
  * @return
  */
-int Editor::getFontSize()
+int odaide::Editor::getFontSize()
 {
     return this->fontSize;
 }
 
-//![slotUpdateRequest]
-
-//![resizeEvent]
-
-void Editor::resizeEvent(QResizeEvent *e)
+/**
+ * @brief odaide::Editor::resizeEvent
+ * @param e
+ */
+void odaide::Editor::resizeEvent(QResizeEvent *e)
 {
     QPlainTextEdit::resizeEvent(e);
 
@@ -332,7 +346,7 @@ void Editor::resizeEvent(QResizeEvent *e)
     lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-int Editor::getLineIndent()
+int odaide::Editor::getLineIndent()
 {
     QString currentLine;
     int lineIndent = 0;
@@ -357,7 +371,7 @@ int Editor::getLineIndent()
 }
 
 /* TODO: ezt meg kell csinálni nagyon nem jó */
-int Editor::getLineIndent(int row)
+int odaide::Editor::getLineIndent(int row)
 {
     QCursor *cursor = new QCursor();
     int rowPos = cursor->pos().y();
@@ -386,7 +400,7 @@ int Editor::getLineIndent(int row)
     return lineIndent;
 }
 
-long Editor::lineCount()
+long odaide::Editor::lineCount()
 {
     return this->document()->lineCount();
 }
@@ -395,7 +409,7 @@ long Editor::lineCount()
 
 //![cursorPositionChanged]
 
-void Editor::highlightCurrentLine()
+void odaide::Editor::highlightCurrentLine()
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
@@ -418,7 +432,7 @@ void Editor::highlightCurrentLine()
  * @brief Editor::highlightCurrentLine
  * @param highlightColor
  */
-void Editor::highlightCurrentLine(QString highlightColor, int lighten = 160)
+void odaide::Editor::highlightCurrentLine(QString highlightColor, int lighten = 160)
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
@@ -438,9 +452,9 @@ void Editor::highlightCurrentLine(QString highlightColor, int lighten = 160)
 }
 
 /**
- * @brief Editor::highlightCurrentLineWrapper
+ * @brief odaide::Editor::highlightCurrentLineWrapper
  */
-void Editor::highlightCurrentLineWrapper()
+void odaide::Editor::highlightCurrentLineWrapper()
 {
     highlightCurrentLine("gray", 180);
 }
@@ -449,7 +463,7 @@ void Editor::highlightCurrentLineWrapper()
 
 //![extraAreaPaintEvent_0]
 
-void Editor::lineNumberAreaPaintEvent(QPaintEvent *event)
+void odaide::Editor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(lineNumberArea);
     painter.fillRect(event->rect(), Qt::lightGray);

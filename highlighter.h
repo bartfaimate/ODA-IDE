@@ -20,13 +20,17 @@ class QTextDocument;
  * comment
  * multilinecomment
  */
+
+namespace odaide {
+
+
 class Highlighter : public QSyntaxHighlighter
 {
     Q_OBJECT
 
 public:
     Highlighter(QTextDocument *parent = 0);
-    Highlighter(Editor *parent);
+    Highlighter(odaide::Editor *parent);
 
 protected:
     void highlightBlock(const QString &text) override;
@@ -65,6 +69,7 @@ public slots:
     void MakeRule();
     void setupRule();
     void setupRule(QString extension);
+    void setupRule(odaide::FileTypes fileType);
     void setupRule(QString keywordColor, QString commentColor, QString stringColor, QString functionColor, QStringList keyWords,
                    QString language, QString classColor="");
    //void CppHighlightingRule();
@@ -73,5 +78,5 @@ public slots:
    //void ArduinoHighlightingRule();
 
 };
-
+} // namespace
 #endif // HIGHLIGHTER_H

@@ -3,19 +3,19 @@
 #include <QColor>
 
 /**
- * @brief Highlighter::Highlighter
+ * @brief odaide::Highlighter::Highlighter
  * @param parent
  */
-Highlighter::Highlighter(QTextDocument *parent)
+odaide::Highlighter::Highlighter(QTextDocument *parent)
     : QSyntaxHighlighter(parent)
 {
-    setupRule();
+    setupRule(odaide::FileTypes::OTHER);
 }
 /**
- * @brief Highlighter::highlightBlock
+ * @brief odaide::Highlighter::highlightBlock
  * @param text
  */
-void Highlighter::highlightBlock(const QString &text)
+void odaide::Highlighter::highlightBlock(const QString &text)
 {
     foreach (const HighlightingRule &rule, highlightingRules) {
         QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
@@ -49,14 +49,14 @@ void Highlighter::highlightBlock(const QString &text)
 
 
 /**
- * @brief Highlighter::CRule
+ * @brief odaide::Highlighter::CRule
  * @param keywordColor
  * @param macroColor
  * @param commentColor
  * @param stringColor
  * @param functionColor
  */
-void Highlighter::CRule(QString keywordColor = "darkblue", QString macroColor = "magenta", QString commentColor = "darkgreen", QString stringColor = "green", QString functionColor = "blue")
+void odaide::Highlighter::CRule(QString keywordColor = "darkblue", QString macroColor = "magenta", QString commentColor = "darkgreen", QString stringColor = "green", QString functionColor = "blue")
 {
     QColor color(keywordColor);
     QBrush brush(color);
@@ -130,7 +130,7 @@ void Highlighter::CRule(QString keywordColor = "darkblue", QString macroColor = 
 
 
 /**
- * @brief Highlighter::CPPRule
+ * @brief odaide::Highlighter::CPPRule
  * @param keywordColor
  * @param macroColor
  * @param commentColor
@@ -138,7 +138,7 @@ void Highlighter::CRule(QString keywordColor = "darkblue", QString macroColor = 
  * @param stringColor
  * @param functionColor
  */
-void Highlighter::CPPRule(QString keywordColor = "darkblue", QString macroColor = "magenta", QString commentColor = "darkgreen", QString classColor = "darkmagenta", QString stringColor = "green", QString functionColor = "blue")
+void odaide::Highlighter::CPPRule(QString keywordColor = "darkblue", QString macroColor = "magenta", QString commentColor = "darkgreen", QString classColor = "darkmagenta", QString stringColor = "green", QString functionColor = "blue")
 {
     QColor color(keywordColor);
     QBrush brush(color);
@@ -217,19 +217,19 @@ void Highlighter::CPPRule(QString keywordColor = "darkblue", QString macroColor 
     commentEndExpression = QRegularExpression("\\*/");
 }
 
-void Highlighter::deleteRule()
+void odaide::Highlighter::deleteRule()
 {
     highlightingRules.clear();
 }
 
 /**
- * @brief Highlighter::PythonRule
+ * @brief odaide::Highlighter::PythonRule
  * @param keywordColor
  * @param classColor
  * @param stringColor
  * @param functionColor
  */
-void Highlighter::PythonRule(QString keywordColor = "darkblue", QString classColor = "magenta", QString commentColor = "red", QString stringColor ="darkcyan", QString functionColor ="blue")
+void odaide::Highlighter::PythonRule(QString keywordColor = "darkblue", QString classColor = "magenta", QString commentColor = "red", QString stringColor ="darkcyan", QString functionColor ="blue")
 {
     QColor color(keywordColor);
     QBrush brush(color);
@@ -293,14 +293,14 @@ void Highlighter::PythonRule(QString keywordColor = "darkblue", QString classCol
 }
 
 /**
- * @brief Highlighter::JavaRule
+ * @brief odaide::Highlighter::JavaRule
  * @param keywordColor
  * @param classColor
  * @param commentColor
  * @param stringColor
  * @param functionColor
  */
-void Highlighter::JavaRule(QString keywordColor = "darkblue", QString classColor = "darkmagenta", QString commentColor = "green", QString stringColor ="darkgreen", QString functionColor = "blue")
+void odaide::Highlighter::JavaRule(QString keywordColor = "darkblue", QString classColor = "darkmagenta", QString commentColor = "green", QString stringColor ="darkgreen", QString functionColor = "blue")
 {
     HighlightingRule rule;
     QColor color(keywordColor);
@@ -373,17 +373,17 @@ void Highlighter::JavaRule(QString keywordColor = "darkblue", QString classColor
 
 
 /**
- * @brief Highlighter::MakeRule
+ * @brief odaide::Highlighter::MakeRule
  */
-void Highlighter::MakeRule()
+void odaide::Highlighter::MakeRule()
 {
 
 }
 
 /**
- * @brief Highlighter::setupRule
+ * @brief odaide::Highlighter::setupRule
  */
-void Highlighter::setupRule()
+void odaide::Highlighter::setupRule()
 {
     // CPPRule();
     PythonRule();
@@ -394,10 +394,10 @@ void Highlighter::setupRule()
 }
 
 /**
- * @brief Highlighter::setupRule
+ * @brief odaide::Highlighter::setupRule
  * @param extension
  */
-void Highlighter::setupRule(QString extension)
+void odaide::Highlighter::setupRule(QString extension)
 {
     deleteRule();
     QString lExtension = extension.toLower();
@@ -415,7 +415,33 @@ void Highlighter::setupRule(QString extension)
     }
 }
 
-void Highlighter::setupRule(QString keywordColor, QString commentColor, QString stringColor, QString functionColor, QStringList keyWords, QString language, QString classColor)
+void odaide::Highlighter::setupRule(odaide::FileTypes fileType)
+{
+    switch(fileType) {
+    case odaide::FileTypes::C_HEADER :
+    case odaide::FileTypes::C_SOURCE :
+        CRule();
+        break;
+    case odaide::FileTypes::CPP_HEADER :
+    case odaide::FileTypes::CPP_SOURCE :
+        CPPRule();
+        break;
+    case odaide::FileTypes::PYTHON_SOURCE :
+        PythonRule();
+        break;
+    case odaide::FileTypes::JAVA_SOURCE :
+        JavaRule();
+        break;
+
+    case odaide::FileTypes::TEXT_FILE :
+    case odaide::FileTypes::OTHER :
+        break;
+    default:
+        break;
+    }
+}
+
+void odaide::Highlighter::setupRule(QString keywordColor, QString commentColor, QString stringColor, QString functionColor, QStringList keyWords, QString language, QString classColor)
 {
 
 }
