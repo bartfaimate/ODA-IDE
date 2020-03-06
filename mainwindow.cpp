@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-
+    delete this;
 }
 
 void MainWindow::createLayout()

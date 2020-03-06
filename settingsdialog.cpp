@@ -6,6 +6,7 @@
 #include "settings.h"
 #include <QMap>
 #include <QDebug>
+#include <QSpinBox>
 
 
 using namespace odaide;
@@ -19,7 +20,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 
 SettingsDialog::~SettingsDialog()
 {
-
+    delete this;
 }
 
 void SettingsDialog::setupLayout()
@@ -52,9 +53,10 @@ void SettingsDialog::createEditorSettingsTab()
     editorSettings = new QWidget();
 
     /*font size*/
-    QLineEdit *fontSizeEdit = new QLineEdit();
-    fontSizeEdit->setText("12");
-    int fontsize = fontSizeEdit->text().toInt();
+    QSpinBox *fontSizeEdit = new QSpinBox();
+    fontSizeEdit->setRange(1,100);
+    fontSizeEdit->setValue(12);
+    fontsize = fontSizeEdit->text().toInt();
     /*font family*/
     QFontComboBox *fontComboBox = new QFontComboBox();
 
@@ -84,6 +86,8 @@ void SettingsDialog::saveSettings()
     qDebug() << "saving settings to " << this->editorSettingsFile;
 
     whatToSave["version"] = "0.1";
+    whatToSave["font_size"] = fontsize;
+    whatToSave["font_family"] = ;
     odaide::Settings::saveSettings(this->editorSettingsFile, whatToSave);
 }
 

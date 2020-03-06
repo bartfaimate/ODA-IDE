@@ -1,0 +1,15 @@
+{
+"keywordPatterns": ["__asm", "break","case", "char", "const", "continue", "default","do"
+                    , "double" , "enum" , "else"
+                    , "extern" , "float"  , "for"
+                    , "goto"
+                    , "inline" , "int" , "if"
+                    , "long" , "short" , "signed"
+                    , "sizeof" , "static"
+                    , "struct" , "switch"
+                    ,"typedef" , "typename"
+                    , "union" , "unsigned"
+                    , "void" , "volatile" , "while"
+                    , "return"],
+"kommentPattern": ["","" ]
+}

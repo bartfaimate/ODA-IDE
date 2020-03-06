@@ -9,11 +9,11 @@ using namespace  odaide;
 int main(int argc, char *argv[])
 {
 #ifdef IDE
-QApplication app(argc, argv);
-MainWindow window;
-window.show();
+    QApplication app(argc, argv);
+    MainWindow window;
+    window.show();
 
-return app.exec();
+    return app.exec();
 #endif
 #ifdef SETTINGS
     std::cout <<"Settings\n";

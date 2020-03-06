@@ -33,6 +33,9 @@ private:
     QString configFolder = "configs/";
     QString editorSettingsFile = configFolder + "editor_settings.ini";
 
+    int fontsize;
+    QString fontFamily;
+
 signals:
 
 public slots:
