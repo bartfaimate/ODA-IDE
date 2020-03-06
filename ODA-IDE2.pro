@@ -37,9 +37,10 @@ SOURCES += \
 #    terminal.cpp
 #    unittests/unittests.cpp
      \
-    settingsdialog.cpp
-    fileextensionmapper.cpp
-    utilities.cpp \
+    settingsdialog.cpp \
+    fileextensionmapper.cpp \
+    utilities.cpp
+
 HEADERS += \
     filemanager.h \
     mainwindow.h \
@@ -50,7 +51,7 @@ HEADERS += \
     statusbar.h \
  \#    terminal.h
     utilities.h \
-    settingsdialog.h
+    settingsdialog.h \
     fileextensionmapper.h
 
 LIBS += -lqtermwidget5
@@ -62,5 +63,5 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-
-DEFINES += "SETTINGS"
+# SETTINGS or IDE
+DEFINES += "IDE"
