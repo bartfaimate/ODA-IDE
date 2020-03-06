@@ -158,7 +158,6 @@ private:
     void createHelpActions();
     void createFileMapper();
     void createTerminal();
-
 //    void createStatusbar(int height);
 
     void keyPressEvent(QKeyEvent *event);
